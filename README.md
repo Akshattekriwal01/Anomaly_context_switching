@@ -8,7 +8,7 @@
 
 **File Description.**
 
-
+|File Name| Description
 | --- | --- |
 | os\_module.py | This is the python client for collecting context switching data and sending it over to the clearblade platformat every 3 seconds using MQTT |
 | analytics.js | Analyzes anomaly detection and published the data on topic &quot;analytics&quot; over MQTT |
