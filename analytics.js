@@ -12,16 +12,9 @@
 
  function Analytics_test(req,resp){
     try{
-    // These are parameters passed into the code service
-    var params = req.params
-    
+
     var query = ClearBlade.Query({collectionID: "eef5dd860cd4b6c4ec9ffcadd1f101"});
-	var rawQueryJson = {
-        timestamp: { // 15 minutes ago (from now)
-            $gt: new Date(new Date(new Date().getTime() - (1000*60*15)))
-        }
-    }
-	query.rawQuery(JSON.stringify(rawQueryJson));
+    query.greaterThan("timestamp", new Date(new Date().getTime() - (1000*60*5)).valueOf()) 	
     query.ascending("timestamp");
     query.setPage(400, 1);
 
@@ -33,15 +26,17 @@
             // analytics
             var total_load = 0
             var total_ctx_switches = 0;
+            log(data)
             data.forEach(function(e){
 
                 e.ctx_switches = (e.ctx_switches/e.processor_count)/100
                 total_ctx_switches = total_ctx_switches + e.ctx_switches
 
                 // find load 
-                e.load = e.process_queue/e.processor_count * 100
+                e.load = e.process_queue/e.processor_count * 15
+                e.load = e.load*e.load
                 total_load = total_load + e.load
-
+                e.timestamp = e.timestamp/1000 //Python doesnt support miliseconds
             })
             var avg_load = total_load/data.length 
             var avg_ctx_switches = total_ctx_switches/data.length 
@@ -54,8 +49,8 @@
             })
 
             var payload = {"data":data, "anomaly_time": anomaly_time}
-
-            //publish the payload to topic "analytics"
+           
+            //PUBLISH the payload to topic "analytics"
             function myCodeService(req, resp){
                 var client = new MQTT.Client();
                client.publish("analytics", JSON.stringify(payload))

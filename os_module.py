@@ -33,16 +33,15 @@ mqtt = mySystem.Messaging(akshat)
 mqtt.connect()
 #Send data every 3 second
 while (True):
+    try:
+        payload = { "ctx_switches" : psutil.cpu_stats().ctx_switches,
+                    "processor_count": psutil.cpu_count(), # count keeps changing on linux and windows.
+                    "process_queue": psutil.getloadavg()[0], } # length of process queue.
 
-    payload = { "ctx_switches" : psutil.cpu_stats().ctx_switches,
-                "processor_count": psutil.cpu_count(), # count keeps changing on linux and windows.
-                "process_queue": psutil.getloadavg()[0], } # length of process queue.
-
-    mqtt.publish("data_collection", json.dumps(payload))
-    time.sleep(3)
-
+        mqtt.publish("data_collection", json.dumps(payload))
+        time.sleep(3)
+    except:
+        print("exception occured")
+        
 #Close MQTT
 mqtt.disconnect()
-
-
-
